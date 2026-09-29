@@ -436,10 +436,8 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % The physical mapping is x(X,t) = X + xi(X,t)
-%
 % Its derivative is dx/dX = F.
-%
-% Therefore the mapping is strictly increasing if F > 0
+% so the mapping is strictly increasing if F > 0
 
 minFhalf_each_time = min(F_half_all,[],2);
 
@@ -640,14 +638,6 @@ if ~isempty(first_bad_time)
         1, ...
         'first');
 
-    % error(['The physical mapping is no longer monotone. ' ...
-    %     'First detected at t = %.6e between nodes %d and %d: ' ...
-    %     'x_{i+1}-x_i = %.6e.'], ...
-    %     t(first_bad_time), ...
-    %     bad_interval, ...
-    %     bad_interval + 1, ...
-    %     dx_phys(first_bad_time,bad_interval));
-
 end
 dx_ref = diff(X);
 
@@ -728,7 +718,7 @@ end
 % Réduction de la quantité de donnée envoyée à surf
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Downsampling for graphics only
+% Downsampling for graphics 
 space_step = 1;
 time_step  = 2;
 
@@ -788,11 +778,7 @@ end
 
 figure;
 % surf(x_plot,t,G,'EdgeColor','none');
-surf( ...
-    x_plot(idx_t,idx_x), ...
-    t(idx_t), ...
-    G(idx_t,idx_x), ...
-    'EdgeColor','none');
+surf(x_plot(idx_t,idx_x), t(idx_t), G(idx_t,idx_x), 'EdgeColor','none');
 view(2);
 colorbar;
 xlabel('x');
@@ -805,11 +791,7 @@ xi_center = 0.5 .* (xi_total(:,1) + xi_total(:,end));
 xi_total_centered = xi_total - xi_center;
 figure;
 % surf(x_plot,t,xi_total_centered,'EdgeColor','none');
-surf( ...
-    x_plot(idx_t,idx_x), ...
-    t(idx_t), ...
-    xi_total_centered(idx_t,idx_x), ...
-    'EdgeColor','none');
+surf(x_plot(idx_t,idx_x), t(idx_t), xi_total_centered(idx_t,idx_x), 'EdgeColor','none');
 view(2);
 colorbar;
 xlabel('x');
@@ -837,11 +819,7 @@ subtitle({line1; line2}, 'Interpreter','tex');
 
 figure;
 % surf(x_plot,t,sigma,'EdgeColor','none');
-surf( ...
-    x_plot(idx_t,idx_x), ...
-    t(idx_t), ...
-    sigma(idx_t,idx_x), ...
-    'EdgeColor','none');
+surf(x_plot(idx_t,idx_x), t(idx_t), sigma(idx_t,idx_x), 'EdgeColor','none');
 view(2);
 colorbar;
 xlabel('$x$', 'Interpreter','latex', 'FontSize',30);
