@@ -73,12 +73,7 @@ params.s_vec = [0.0001, 0.00001];          % one traction coefficient s for each
 % Growth law
 params.S0     = 0.049082;
 params.sigmac = 0.05;
-params.S = @(u, sigma, params) ...
-    params.S0 .* ( ...
-        (sigma >= 0) ...
-        + ((sigma < 0) & (sigma > -params.sigmac)) .* ...
-          (1 - abs(sigma) ./ params.sigmac) ...
-    );
+params.S = @(u, sigma, params) params.S0 .* ( (sigma >= 0) + ((sigma < 0) & (sigma > -params.sigmac)) .* (1 - abs(sigma) ./ params.sigmac) );
 
 % Stress law
 params.eta = 1;  
@@ -120,35 +115,6 @@ eps0 = 1e-3;
 U_species0(1,:) = u1_star + eps0*randn(1,N);
 U_species0(2,:) = u2_star + eps0*randn(1,N);
 % U_species0(3,:) = u3_star + eps0*randn(1,N);
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% test
-rng(1)
-
-noise1 = randn(1,N);
-noise2 = randn(1,N);
-
-% Smooth over a fixed physical length
-ell_noise = 0.05;
-% window = max(3, round(ell_noise/dx));
-% 
-% noise1 = smoothdata(noise1,'gaussian',window);
-% noise2 = smoothdata(noise2,'gaussian',window);
-
-% Renormalise so amplitude remains eps0
-% noise1 = noise1 / std(noise1);
-% noise2 = noise2 / std(noise2);
-
-% U_species0(1,:) = u1_star + eps0*noise1;
-% U_species0(2,:) = u2_star + eps0*noise2;
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% noise1 = randn(1,N);
-% noise1 = 0.5 .* (noise1 + fliplr(noise1));
-% noise2 = randn(1,N);
-% noise2 = 0.5 .* (noise2 + fliplr(noise2));
-% U_species0(1,:) = u1_star + eps0 .* noise1;
-% U_species0(2,:) = u2_star + eps0 .* noise2;
 
 
 % Plot parameters
@@ -436,13 +402,11 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % The physical mapping is x(X,t) = X + xi(X,t)
-% Its derivative is dx/dX = F.
-% so the mapping is strictly increasing if F > 0
+% Its derivative is dx/dX = F so the mapping is strictly increasing if F > 0
 
 minFhalf_each_time = min(F_half_all,[],2);
 
-first_nonmonotone_idx = find( ...
-    minFhalf_each_time <= 0,1,'first');
+first_nonmonotone_idx = find(minFhalf_each_time <= 0,1,'first');
 if ~isempty(first_nonmonotone_idx)
 
     [minF_value,interval_idx] = min( ...
@@ -623,70 +587,6 @@ end
 x_phys = X' + xi;
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Direct discrete monotonicity check
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-dx_phys = diff(x_phys,1,2);
-
-first_bad_time = find(any(dx_phys <= 0,2),1,'first');
-
-if ~isempty(first_bad_time)
-
-    bad_interval = find( ...
-        dx_phys(first_bad_time,:) <= 0, ...
-        1, ...
-        'first');
-
-end
-dx_ref = diff(X);
-
-% Deformation gradient on the intervals [X_i,X_{i+1}]
-F_interval = diff(x_phys,1,2) ./ dx_ref';
-
-[min_F_interval_each_time,idx_interval] = min(F_interval,[],2);
-
-first_bad = find(min_F_interval_each_time <= 0,1,'first');
-
-if ~isempty(first_bad)
-
-    i_bad = idx_interval(first_bad);
-
-    fprintf(['First node crossing:\n' ...
-        't = %.6e\n' ...
-        'interval = [%d,%d]\n' ...
-        'X = [%.6e,%.6e]\n' ...
-        'x = [%.6e,%.6e]\n' ...
-        'F_interval = %.6e\n' ...
-        'F_centered(i) = %.6e\n' ...
-        'F_centered(i+1) = %.6e\n'], ...
-        t(first_bad), ...
-        i_bad, i_bad+1, ...
-        X(i_bad), X(i_bad+1), ...
-        x_phys(first_bad,i_bad), ...
-        x_phys(first_bad,i_bad+1), ...
-        F_interval(first_bad,i_bad), ...
-        F(first_bad,i_bad), ...
-        F(first_bad,i_bad+1));
-    i1 = max(i_bad-10,1);
-    i2 = min(i_bad+10,N);
-
-    figure;
-    plot(X(i1:i2),x_phys(first_bad,i1:i2),'-o');
-    xlabel('X');
-    ylabel('x(X,t)');
-    title(sprintf('Physical mapping near crossing, t = %.3f', t(first_bad)));
-
-    figure;
-    plot(X(i1:i2),xi(first_bad,i1:i2),'-o');
-    xlabel('X');
-    ylabel('\xi(X,t)');
-    title('Local displacement near crossing');
-
-
-end
-
-
 
 % Physical domain length
 L_phys = x_phys(:,end) - x_phys(:,1);
@@ -737,8 +637,9 @@ end
 
 
 
-%% --------------------------------------------------------
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Plot
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 figure;
 plot(t,L_phys,'LineWidth',2);
