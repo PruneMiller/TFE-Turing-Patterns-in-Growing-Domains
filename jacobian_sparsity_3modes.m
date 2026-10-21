@@ -1,5 +1,5 @@
 function S = jacobian_sparsity_3modes(N,Nb_species,modelOrder)
-% JACOBIAN_SPARSITY_3MODES
+
 % Sparsity pattern of dPHI/dU.
 %
 % modelOrder = 0:
@@ -21,8 +21,7 @@ function S = jacobian_sparsity_3modes(N,Nb_species,modelOrder)
 
 
     % Species are stored node by node because U_species(:) gives:
-    %
-    % [u1(X1),...,un(X1),u1(X2),...,un(X2),...]
+    %[u1(X1),...,un(X1),u1(X2),...,un(X2),...]
 
     idx_species = @(i) (i-1)*Nb_species + (1:Nb_species);
 
@@ -38,7 +37,6 @@ function S = jacobian_sparsity_3modes(N,Nb_species,modelOrder)
         case 0
 
             % State:
-            %
             % U = [species; G; A_half; xi]
 
             Nspecies = Nb_species*N;
@@ -98,14 +96,9 @@ function S = jacobian_sparsity_3modes(N,Nb_species,modelOrder)
                 %
                 % The diffusion stencil involves species at i-1:i+1.
                 %
-                % Since
-                %
-                %     F_half = A_half .* G_half,
-                %
-                % the nodal F values entering nearby fluxes depend on:
-                %
-                %     G at approximately i-2:i+2,
-                %     A_half at approximately i-2:i+1
+                % Since F_half = A_half .* G_half, the nodal F values entering nearby fluxes depend on:
+                % G at approximately i-2:i+2,
+                % A_half at approximately i-2:i+1
 
                 for j = neigh1
 
@@ -137,12 +130,10 @@ function S = jacobian_sparsity_3modes(N,Nb_species,modelOrder)
                 % phi_G = S(u,sigma)*G
                 %
                 % At node i, u and sigma may depend on:
-                %
                 % - local species;
                 % - nearby G through F_node;
                 % - interfaces A_{i-1/2} and A_{i+1/2};
-                % - local xi if EpsilonLaw or SigmaLaw depends explicitly
-                %   on xi.
+                % - local xi if EpsilonLaw or SigmaLaw depends explicitly on xi.
 
                 S(row_G, idx_species(i)) = 1;
 
@@ -204,12 +195,9 @@ function S = jacobian_sparsity_3modes(N,Nb_species,modelOrder)
             %
             % Interior equation:
             %
-            % (sigma_{i+1/2}-sigma_{i-1/2})/dx
-            % - force_density_i*xi_i
-            % = 0.
+            % (sigma_{i+1/2}-sigma_{i-1/2})/dx - force_density_i*xi_i = 0.
             %
             % The stress at the two adjacent interfaces can depend on:
-            %
             % - species at i-1:i+1;
             % - G at i-1:i+1;
             % - A_half at interfaces i-1 and i;
