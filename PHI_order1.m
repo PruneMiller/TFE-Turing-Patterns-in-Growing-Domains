@@ -139,8 +139,7 @@ function phi = PHI_order1(U, params)
 
 
     % q evolution
-    % q_t = -(a0/a1)q
-    %       + (b0 - a0*b1/a1)epsilon
+    % q_t = -(a0/a1)q + (b0 - a0*b1/a1)epsilon
 
     phi_q = -(params.visco.a0/params.visco.a1) .* q_half + (params.visco.b0 - params.visco.a0*params.visco.b1/params.visco.a1) .* epsilon_half;
 
